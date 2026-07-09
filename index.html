@@ -100,6 +100,15 @@
     background:var(--accent); color:var(--accent-contrast);
     border:1px solid var(--accent); border-radius:24px; padding:12px 0; min-height:50px;
   }
+  .fb-btn{
+    position:fixed; right:max(14px, env(safe-area-inset-right));
+    bottom:calc(92px + env(safe-area-inset-bottom));
+    width:46px; height:46px; border-radius:50%;
+    background:var(--chip-bg); color:var(--ink); border:1px solid var(--line);
+    font-size:19px; cursor:pointer; z-index:20;
+    box-shadow:0 2px 10px rgba(0,0,0,.12);
+  }
+  #fbOv{z-index:30}
   .overlay{position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:10; display:flex; align-items:flex-end; justify-content:center}
   .overlay[hidden]{display:none}
   .sheet{
@@ -208,6 +217,19 @@
   </div>
 </div>
 
+<button class="fb-btn" id="fbBtn" aria-label="Feedback — write from anywhere">✎</button>
+<div class="overlay" id="fbOv" hidden>
+  <div class="sheet" role="dialog" aria-label="Feedback">
+    <h2>Feedback</h2>
+    <p class="when" id="fbWhere"></p>
+    <textarea id="fbTa" rows="1" placeholder="anything, from anywhere — course riffs, app gripes, a thought mid-sit…"></textarea>
+    <div class="row">
+      <button class="btn quiet" id="fbClose">Close</button>
+      <button class="btn" id="fbSave">Save</button>
+    </div>
+  </div>
+</div>
+
 <script>
 const NS = 'choiceful_v1';
 let S = {};
@@ -215,6 +237,7 @@ try { S = JSON.parse(localStorage.getItem(NS) || '{}'); } catch(e){ S = {}; }
 S.entries = S.entries || [];   // {t, ctx, felt, ran, then, note}
 S.sits    = S.sits    || {};   // 'YYYY-MM-DD': dayNum
 S.pens    = S.pens    || {};   // penId: text
+S.fb      = S.fb      || [];   // {t, where, text} — traveling feedback dock
 S.day     = S.day     || 1;
 function save(){ try{ localStorage.setItem(NS, JSON.stringify(S)); }catch(e){} }
 function todayKey(){ const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
@@ -508,6 +531,10 @@ function buildExport(){
     if(S.pens[id]&&S.pens[id].trim()){ any=true; L.push('**'+label+':** '+S.pens[id].trim()); L.push(''); }
   }
   if(!any) L.push('- none yet');
+  L.push('');
+  L.push('## Feedback');
+  if(!S.fb.length) L.push('- none');
+  S.fb.forEach(f=>{ L.push('- '+fmtTime(f.t)+' ('+f.where+'): '+f.text.trim()); });
   return L.join('\n');
 }
 function openExport(){
@@ -523,6 +550,31 @@ document.getElementById('copyExp').addEventListener('click', async ()=>{
   try{ await navigator.clipboard.writeText(ta.value); ok=true; }catch(e){}
   if(!ok){ ta.focus(); ta.select(); try{ ok=document.execCommand('copy'); }catch(e){} }
   document.getElementById('copyExp').textContent = ok? 'Copied ✓' : 'Copy failed — long-press the box';
+});
+
+// ---------- traveling feedback dock ----------
+function whereNow(){
+  if(!cardOv.hidden) return 'the move card';
+  if(!sheetOv.hidden) return 'urge sheet';
+  if(!expOv.hidden) return 'export';
+  return tab==='today' ? ('today · day '+S.day) : 'log';
+}
+const fbOv = document.getElementById('fbOv');
+const fbTa = document.getElementById('fbTa');
+let fbFrom = '';
+document.getElementById('fbBtn').addEventListener('click', ()=>{
+  fbFrom = whereNow();
+  document.getElementById('fbWhere').textContent = 'from: '+fbFrom;
+  fbTa.value = '';
+  fbOv.hidden = false;
+  requestAnimationFrame(()=>{ grow(fbTa); fbTa.focus(); });
+});
+document.getElementById('fbClose').addEventListener('click', ()=>{ fbOv.hidden=true; });
+fbOv.addEventListener('click', e=>{ if(e.target===fbOv) fbOv.hidden=true; });
+fbTa.addEventListener('input', ()=>grow(fbTa));
+document.getElementById('fbSave').addEventListener('click', ()=>{
+  if (fbTa.value.trim()){ S.fb.push({ t:new Date().toISOString(), where:fbFrom, text:fbTa.value }); save(); }
+  fbOv.hidden = true;
 });
 
 // ---------- tabs ----------
