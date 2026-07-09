@@ -1,0 +1,11 @@
+{
+  "name": "Choicefulness",
+  "short_name": "Choiceful",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#F6F6F3",
+  "theme_color": "#33597F",
+  "icons": [
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}

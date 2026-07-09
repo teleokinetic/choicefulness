@@ -1,0 +1,543 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Choiceful">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="manifest" href="manifest.json">
+<title>Choicefulness</title>
+<style>
+  :root{
+    --paper:#F6F6F3; --ink:#22262C; --muted:#5F666E; --line:#DCDDD7;
+    --accent:#33597F; --accent-contrast:#FFFFFF;
+    --chip-bg:#FFFFFF; --dock-bg:rgba(246,246,243,.94);
+    --serif:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --paper:#15171B; --ink:#E7E5E0; --muted:#9AA0A8; --line:#2B2E34;
+      --accent:#8FB4DC; --accent-contrast:#12161C;
+      --chip-bg:#1C1F24; --dock-bg:rgba(21,23,27,.94);
+    }
+  }
+  *{box-sizing:border-box}
+  html{background:var(--paper)}
+  body{
+    margin:0; background:var(--paper); color:var(--ink);
+    font-family:var(--sans); font-size:17px; line-height:1.55;
+    -webkit-text-size-adjust:100%;
+    padding-bottom:calc(88px + env(safe-area-inset-bottom));
+  }
+  .wrap{max-width:620px; margin:0 auto; padding:20px 18px 40px}
+  .topbar{display:flex; align-items:baseline; gap:12px; padding-top:max(10px, env(safe-area-inset-top))}
+  .brand{font-size:12px; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); flex:1}
+  .movebtn{
+    font-family:var(--sans); font-size:14px; font-weight:600; cursor:pointer;
+    border:1px solid var(--line); background:var(--chip-bg); color:var(--ink);
+    border-radius:18px; padding:7px 14px;
+  }
+  h1{font-family:var(--serif); font-weight:500; font-size:26px; margin:14px 0 4px; text-wrap:balance}
+  .sub{color:var(--muted); font-size:15px; margin:0 0 18px}
+  .daychips{display:flex; gap:8px; margin:0 0 6px}
+  .block{border-top:1px solid var(--line); margin-top:26px; padding-top:18px}
+  .block-eyebrow{font-size:12px; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); margin:0 0 8px}
+  .block p{margin:0 0 10px}
+  .quote{font-family:var(--serif); font-size:18px; line-height:1.5; margin:0 0 6px; text-wrap:pretty}
+  .attr{font-size:14px; color:var(--muted); margin:0 0 12px}
+  ol.steps{margin:0 0 12px; padding-left:22px}
+  ol.steps li{margin-bottom:10px}
+  details{border:1px solid var(--line); border-radius:10px; padding:10px 14px; margin:0 0 12px; background:var(--chip-bg)}
+  summary{cursor:pointer; font-weight:600; font-size:15.5px}
+  details[open] summary{margin-bottom:8px}
+  .chip,.opt{
+    font-family:var(--sans); font-size:16px; line-height:1.3; text-align:left;
+    color:var(--ink); background:var(--chip-bg);
+    border:1px solid var(--line); border-radius:20px;
+    padding:9px 15px; min-height:42px; cursor:pointer;
+  }
+  .chip[aria-pressed="true"],.opt[aria-pressed="true"]{
+    background:var(--accent); color:var(--accent-contrast); border-color:var(--accent);
+  }
+  .chip[aria-pressed="true"]::before,.opt[aria-pressed="true"]::before{content:"✓ "}
+  .chips{display:flex; flex-wrap:wrap; gap:8px; margin:0 0 12px}
+  textarea{
+    display:block; width:100%; background:var(--chip-bg); color:var(--ink);
+    border:1px solid var(--line); border-radius:8px;
+    font-family:var(--sans); font-size:16px; line-height:1.5;
+    padding:10px 12px; resize:none; min-height:44px; overflow:hidden; margin:0 0 12px;
+  }
+  textarea::placeholder{color:var(--muted); opacity:.8}
+  .btn{
+    font-family:var(--sans); font-size:16px; font-weight:600; cursor:pointer;
+    border-radius:22px; padding:11px 20px; min-height:44px;
+    border:1px solid var(--accent); background:var(--accent); color:var(--accent-contrast);
+  }
+  .btn.quiet{background:transparent; color:var(--ink); border-color:var(--line); font-weight:500}
+  .btn:focus-visible,.chip:focus-visible,.opt:focus-visible,textarea:focus-visible,.movebtn:focus-visible,.tab:focus-visible{
+    outline:2px solid var(--accent); outline-offset:2px;
+  }
+  .timer{display:flex; align-items:center; gap:14px; margin:0 0 12px}
+  .timer .clock{font-variant-numeric:tabular-nums; font-size:28px; font-family:var(--serif)}
+  .tabbar{
+    position:fixed; left:0; right:0; bottom:0; z-index:5;
+    background:var(--dock-bg); border-top:1px solid var(--line);
+    backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px);
+    padding-bottom:env(safe-area-inset-bottom);
+  }
+  .tabbar-inner{max-width:620px; margin:0 auto; display:flex; align-items:center; gap:8px; padding:10px 18px}
+  .tab{
+    flex:1; font-family:var(--sans); font-size:16px; font-weight:600; cursor:pointer;
+    background:transparent; border:1px solid transparent; color:var(--muted);
+    border-radius:20px; padding:10px 0; min-height:44px; text-align:center;
+  }
+  .tab[aria-selected="true"]{color:var(--ink); border-color:var(--line); background:var(--chip-bg)}
+  .urgebtn{
+    flex:1.2; font-size:17px; font-weight:700; cursor:pointer;
+    background:var(--accent); color:var(--accent-contrast);
+    border:1px solid var(--accent); border-radius:24px; padding:12px 0; min-height:50px;
+  }
+  .overlay{position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:10; display:flex; align-items:flex-end; justify-content:center}
+  .overlay[hidden]{display:none}
+  .sheet{
+    background:var(--paper); border:1px solid var(--line); border-radius:16px 16px 0 0;
+    width:100%; max-width:620px; padding:18px 18px calc(18px + env(safe-area-inset-bottom));
+    max-height:88vh; overflow-y:auto;
+  }
+  .sheet h2{font-family:var(--serif); font-weight:500; font-size:21px; margin:0 0 4px}
+  .sheet .when{font-size:14px; color:var(--muted); margin:0 0 14px; font-variant-numeric:tabular-nums}
+  .sheet .lbl{font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); margin:12px 0 6px}
+  .sheet .row{display:flex; gap:10px; justify-content:flex-end; margin-top:6px}
+  .cardwrap{align-items:center}
+  .card{
+    background:var(--paper); border:1px solid var(--line); border-radius:16px;
+    width:calc(100% - 24px); max-width:560px; padding:22px 20px; max-height:88vh; overflow-y:auto;
+  }
+  .card h2{font-family:var(--serif); font-weight:500; font-size:24px; margin:0 0 2px}
+  .card .v{font-size:13px; color:var(--muted); margin:0 0 16px}
+  .card ol{margin:0 0 16px; padding-left:24px}
+  .card li{font-family:var(--serif); font-size:19px; line-height:1.5; margin-bottom:14px}
+  .card .fm{font-size:14.5px; color:var(--muted); border-top:1px solid var(--line); padding-top:12px}
+  .card .fm strong{color:var(--ink)}
+  .stats{display:flex; gap:18px; margin:0 0 6px; font-variant-numeric:tabular-nums}
+  .stat .n{font-family:var(--serif); font-size:26px}
+  .stat .l{font-size:13px; color:var(--muted)}
+  .entry{border-top:1px solid var(--line); padding:12px 0; cursor:pointer}
+  .entry .t{font-size:14px; color:var(--muted); font-variant-numeric:tabular-nums}
+  .entry .s{font-size:16px; margin-top:2px}
+  .empty{color:var(--muted); font-size:15.5px; border-top:1px solid var(--line); padding-top:14px}
+  .exp-ta{min-height:200px; overflow:auto}
+  @media (prefers-reduced-motion: no-preference){
+    .chip,.opt,.tab{transition:background .12s ease, color .12s ease, border-color .12s ease}
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="topbar">
+    <span class="brand">Choicefulness</span>
+    <button class="movebtn" id="openCard">The move</button>
+  </div>
+  <div id="view"></div>
+</div>
+
+<nav class="tabbar">
+  <div class="tabbar-inner">
+    <button class="tab" id="tabToday" aria-selected="true">Today</button>
+    <button class="urgebtn" id="urgeBtn">⚡ Urge</button>
+    <button class="tab" id="tabLog" aria-selected="false">Log</button>
+  </div>
+</nav>
+
+<!-- urge entry sheet -->
+<div class="overlay" id="sheetOv" hidden>
+  <div class="sheet" role="dialog" aria-label="Urge entry">
+    <h2>Logged.</h2>
+    <p class="when" id="sheetWhen"></p>
+    <p style="font-size:14.5px;color:var(--muted);margin:0 0 4px">The tap was the whole job. Everything below is optional — add it now or never.</p>
+    <p class="lbl">Where were you</p>
+    <div class="chips" id="ctxChips"></div>
+    <p class="lbl">Drop in for a second</p>
+    <textarea id="feltTa" rows="1" placeholder="where is it in the body? · shape, size? · temperature, movement?"></textarea>
+    <p class="lbl">The move</p>
+    <div class="chips" id="ranChips"></div>
+    <p class="lbl">Then</p>
+    <div class="chips" id="thenChips"></div>
+    <textarea id="noteTa" rows="1" placeholder="anything else…"></textarea>
+    <div class="row">
+      <button class="btn quiet" id="delEntry">Delete</button>
+      <button class="btn" id="closeSheet">Done</button>
+    </div>
+  </div>
+</div>
+
+<!-- practice card overlay -->
+<div class="overlay cardwrap" id="cardOv" hidden>
+  <div class="card" role="dialog" aria-label="The two-minute move">
+    <h2>The two-minute move</h2>
+    <p class="v">v0.1 · run it as written; wrongness is revision material</p>
+    <ol>
+      <li>Feet. Feel no separation between your feet and the floor.</li>
+      <li>Settle downward inside your chest and neck. The urge pulls upward — you settle down. Sitting in your heart; no pressing, no collapse.</li>
+      <li>Find the raw quality of desire in your body — wanting itself, before any object. Wherever it&rsquo;s easiest.</li>
+      <li>Ask: what is this urge actually asking for? Find the want inside it. Name it once, if naming helps.</li>
+      <li>Feel that want directly, as raw desire. Bathe in it, no subject. Not the note that it&rsquo;s there — the wanting itself, in the body.</li>
+      <li>Now choose, from here. Either way, the rule is kept.</li>
+    </ol>
+    <p class="fm"><strong>Failure modes.</strong> Toll-booth — running the move to pay for a yes; detector: nothing was felt. Grade the run, not yourself. · Noting instead of feeling — locating the want and filing the note. · Arguing with the urge — there&rsquo;s no case to win. · Skipping the ground — steps 1&ndash;2 are what make 3&ndash;5 possible.</p>
+    <div style="display:flex;justify-content:flex-end;margin-top:14px">
+      <button class="btn" id="closeCard">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- export overlay -->
+<div class="overlay cardwrap" id="expOv" hidden>
+  <div class="card" role="dialog" aria-label="Export">
+    <h2>Export</h2>
+    <p style="font-size:14.5px;color:var(--muted)">Tap Copy, then paste into our chat. If Copy doesn&rsquo;t take, long-press in the box.</p>
+    <textarea id="expTa" class="exp-ta" readonly></textarea>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:10px">
+      <button class="btn quiet" id="closeExp">Close</button>
+      <button class="btn" id="copyExp">Copy</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const NS = 'choiceful_v1';
+let S = {};
+try { S = JSON.parse(localStorage.getItem(NS) || '{}'); } catch(e){ S = {}; }
+S.entries = S.entries || [];   // {t, ctx, felt, ran, then, note}
+S.sits    = S.sits    || {};   // 'YYYY-MM-DD': dayNum
+S.pens    = S.pens    || {};   // penId: text
+S.day     = S.day     || 1;
+function save(){ try{ localStorage.setItem(NS, JSON.stringify(S)); }catch(e){} }
+function todayKey(){ const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+function fmtTime(iso){ const d=new Date(iso); return d.toLocaleDateString(undefined,{month:'short',day:'numeric'})+' · '+d.toLocaleTimeString(undefined,{hour:'numeric',minute:'2-digit'}); }
+
+const RULE = 'When the urge shows up — anywhere, any time — the two-minute move runs first. After the move, the choice is genuinely free.';
+
+const CTX  = ['after a session','afternoon slump','evening','other'];
+const RAN  = ['the move ran','it didn’t'];
+const THEN = ['moved on','went ahead','still open'];
+
+const DAYS = {
+  1: { title:'Install the rule',
+    blocks:[
+      {k:'rule', first:true},
+      {k:'soak',
+       quote:'The fluidity that we experience as the stillness of fundamental consciousness is nongrasping; it is letting life happen just as it does. But this is not a passive receptivity… And we can also choose not to act on our impulse to affect a situation. We are right there, with all of our faculties to guide our actions. The nongrasping of fundamental consciousness is not in any way a paralysis.',
+       attr:'Judith Blackstone, The Fullness of the Ground',
+       pen:{id:'d1_soak', ph:'how is this different from white-knuckling? your words…'}},
+      {k:'sit', steps:[
+        'Settle. Whole body, feet, ground. Let the breath drop. Give this a couple of minutes.',
+        'Evoke, at low heat: a weekday afternoon at home. The session just ended; the screen has gone dark. A flicker of boredom, a flicker of attraction. The phone is near. Hold it like a picture at arm’s length.',
+        'Catch the reach starting.',
+        'Run the move. Open the card and read it slowly, doing each step as you read. This is the only day the card leads.',
+        'Let the scene dissolve. Rest a moment.',
+        'Round two: evoke again, a touch closer. Run the move from memory this time; peek only if you need to.',
+        'Close: say the rule once. Then picture tomorrow’s most likely window, once — and see the move running there.']},
+      {k:'rapid', text:'Without looking: the six steps, out loud, fast. Then open the card and check what dropped — the misses are tomorrow’s target.'},
+      {k:'note', text:'The log is live from right now. Any urge, anywhere: tap ⚡. The tap is the whole job — details are optional, then or never.'},
+      {k:'pen', id:'d1_rule', label:'Say it back', ph:'the rule, in your own words…'},
+    ]},
+  2: { title:'From memory',
+    blocks:[
+      {k:'rule'},
+      {k:'soak',
+       quote:'Craving is an obsessive wanting… It’s like I want something and I don’t feel like I’m going to be complete without it… That causes suffering. Wanting, totally natural. And the interesting thing is that the more you own your want, the less the want hooks you.',
+       attr:'Joe Hudson, Art of Accomplishment E152',
+       quote2:'It’s when you can’t be with or in that wanting, when you’re right outside of it needing to solve it — that’s the craving. I can’t be with the wanting, so I have to make it go away by solving it.',
+       attr2:'Alexa, same conversation',
+       pen:{id:'d2_soak', ph:'“I can’t be with the wanting, so I have to make it go away by solving it.” — where did you feel that this week?'}},
+      {k:'sit', steps:[
+        'Settle. Whole body, feet, ground.',
+        'Evoke, hotter: the phone is already in your hand. The first flick has happened. Feel what that does in the body.',
+        'Run the move — from memory. The card is backup, not the lead.',
+        'Dissolve. Rest.',
+        'Two more rounds if you’re steady, each from memory.',
+        'Close: the rule, once. Tomorrow’s window, once.']},
+      {k:'rapid', text:'Rapid-fire, twice through. Check what dropped.'},
+      {k:'note', text:'Field task: after your next real 1:1 session ends, run the move once — urge or no urge. It’s a cooldown, not an emergency brake. Running it on a quiet window teaches the body the doorway.'},
+      {k:'pen', id:'d2_field', label:'Field note', ph:'the post-session run — what happened?'},
+    ]},
+  3: { title:'Both things are true',
+    blocks:[
+      {k:'rule'},
+      {k:'soak',
+       quote:'There’s a way in which it feels like a choice the whole time, but I keep making the same decision. Both of those things are true.',
+       attr:'You, two days ago.',
+       body:'Liberating perception says every pattern is a chain — perception → interpretation → response — fused so fast it feels like one thing. The stem for unfusing it: “[X] happened. I said to myself, I am ___, and therefore I must ___.” No justification, no blame; those aren’t part of the exercise.',
+       pen:{id:'d3_stem', ph:'take one moment from your log. run the stem on it…'}},
+      {k:'sit', steps:[
+        'Settle.',
+        'Rapid-fire the six steps, three times, fast, from memory.',
+        'Then one full slow round, at whatever heat presents itself today.',
+        'Close: the rule, once. Tomorrow’s window, once.']},
+      {k:'review', text:'Read your own entries from the last two days (Log tab). What did the urges actually ask for — what wants showed up inside them? Anything repeat?', pen:{id:'d3_review', ph:'what the log says so far…'}},
+      {k:'pen', id:'d3_teach', label:'Say it back', ph:'teach the two-minute move to someone who’s never heard of it. this feeds the card’s next version…'},
+    ]},
+};
+
+// ---------- rendering ----------
+const view = document.getElementById('view');
+let tab = 'today';
+
+function render(){ view.innerHTML=''; if(tab==='today') renderToday(); else renderLog(); }
+
+function el(tag, cls, text){ const e=document.createElement(tag); if(cls) e.className=cls; if(text!==undefined) e.textContent=text; return e; }
+
+function penTa(id, ph){
+  const ta = el('textarea'); ta.rows=1; ta.placeholder = ph;
+  ta.value = S.pens[id] || '';
+  ta.addEventListener('input', ()=>{ S.pens[id]=ta.value; save(); grow(ta); });
+  requestAnimationFrame(()=>grow(ta));
+  return ta;
+}
+function grow(ta){ ta.style.height='auto'; ta.style.height=Math.max(44, ta.scrollHeight)+'px'; }
+
+function renderToday(){
+  const day = DAYS[S.day] ? S.day : 1;
+  const chips = el('div','daychips');
+  Object.keys(DAYS).forEach(d=>{
+    const b = el('button','chip','Day '+d);
+    b.setAttribute('aria-pressed', String(+d===day));
+    b.addEventListener('click', ()=>{ S.day=+d; save(); render(); });
+    chips.appendChild(b);
+  });
+  view.appendChild(chips);
+  view.appendChild(el('h1', null, 'Day '+day+' — '+DAYS[day].title));
+  view.appendChild(el('p','sub','10–15 minutes, whenever it fits today.'));
+
+  for (const b of DAYS[day].blocks){
+    const sec = el('div','block');
+    if (b.k==='rule'){
+      sec.appendChild(el('p','block-eyebrow','The rule'));
+      if (b.first){
+        sec.appendChild(el('p',null,'Read it three times. Then put the phone face-down and say it once, out loud.'));
+        sec.appendChild(el('p','quote', RULE));
+      } else {
+        sec.appendChild(el('p',null,'Say the rule out loud, from memory. Then check.'));
+        const d = el('details'); d.appendChild(el('summary',null,'Check the rule'));
+        d.appendChild(el('p','quote',RULE)); sec.appendChild(d);
+      }
+    }
+    if (b.k==='soak'){
+      sec.appendChild(el('p','block-eyebrow','Soak'));
+      sec.appendChild(el('p','quote','“'+b.quote+'”'));
+      sec.appendChild(el('p','attr','— '+b.attr));
+      if (b.quote2){ sec.appendChild(el('p','quote','“'+b.quote2+'”')); sec.appendChild(el('p','attr','— '+b.attr2)); }
+      if (b.body){ sec.appendChild(el('p',null,b.body)); }
+      if (b.pen) sec.appendChild(penTa(b.pen.id, b.pen.ph));
+    }
+    if (b.k==='sit'){
+      sec.appendChild(el('p','block-eyebrow','The sit — rehearsal'));
+      const d = el('details'); d.open = true;
+      d.appendChild(el('summary',null,'Today’s shape'));
+      const ol = el('ol','steps');
+      b.steps.forEach(s=>ol.appendChild(el('li',null,s)));
+      d.appendChild(ol); sec.appendChild(d);
+      const t = el('div','timer');
+      const clock = el('span','clock','0:00');
+      const btn = el('button','btn quiet','Start');
+      let iv=null, t0=null;
+      btn.addEventListener('click', ()=>{
+        if (iv){ clearInterval(iv); iv=null; btn.textContent='Start'; }
+        else {
+          t0 = Date.now() - (clock.dataset.ms?+clock.dataset.ms:0);
+          btn.textContent='Stop';
+          iv = setInterval(()=>{
+            const ms = Date.now()-t0; clock.dataset.ms=ms;
+            const m = Math.floor(ms/60000), s = Math.floor(ms/1000)%60;
+            clock.textContent = m+':'+String(s).padStart(2,'0');
+          }, 500);
+        }
+      });
+      t.appendChild(clock); t.appendChild(btn);
+      const satBtn = el('button','btn quiet', S.sits[todayKey()] ? 'Sat today ✓' : 'Mark sat today');
+      satBtn.addEventListener('click', ()=>{
+        if (S.sits[todayKey()]) delete S.sits[todayKey()];
+        else S.sits[todayKey()] = day;
+        save(); satBtn.textContent = S.sits[todayKey()] ? 'Sat today ✓' : 'Mark sat today';
+      });
+      t.appendChild(satBtn);
+      sec.appendChild(t);
+    }
+    if (b.k==='rapid'){
+      sec.appendChild(el('p','block-eyebrow','Rapid-fire'));
+      sec.appendChild(el('p',null,b.text));
+      const d = el('details'); d.appendChild(el('summary',null,'Check the steps'));
+      const ol = el('ol','steps');
+      ['Feet — no separation with the floor','Settle downward, chest and neck','Find the raw quality of desire','Find the want inside the urge','Feel that want as raw desire — bathe, no subject','Choose from here — either way, the rule is kept']
+        .forEach(s=>ol.appendChild(el('li',null,s)));
+      d.appendChild(ol); sec.appendChild(d);
+    }
+    if (b.k==='note'){
+      sec.appendChild(el('p','block-eyebrow','Field'));
+      sec.appendChild(el('p',null,b.text));
+    }
+    if (b.k==='review'){
+      sec.appendChild(el('p','block-eyebrow','Log review'));
+      sec.appendChild(el('p',null,b.text));
+      if (b.pen) sec.appendChild(penTa(b.pen.id, b.pen.ph));
+    }
+    if (b.k==='pen'){
+      sec.appendChild(el('p','block-eyebrow',b.label));
+      sec.appendChild(penTa(b.id, b.ph));
+    }
+    view.appendChild(sec);
+  }
+}
+
+function renderLog(){
+  view.appendChild(el('h1',null,'Log'));
+  const stats = el('div','stats');
+  const marked = S.entries.filter(e=>e.ran!==undefined && e.ran!==null);
+  const ranN = marked.filter(e=>e.ran===0).length;
+  const sitN = Object.keys(S.sits).length;
+  [[S.entries.length,'urges logged'],
+   [marked.length? Math.round(100*ranN/marked.length)+'%':'—','move ran'],
+   [sitN,'sits']].forEach(([n,l])=>{
+    const s = el('div','stat'); s.appendChild(el('div','n',String(n))); s.appendChild(el('div','l',l)); stats.appendChild(s);
+  });
+  view.appendChild(stats);
+
+  const exp = el('button','btn quiet','Copy export');
+  exp.style.margin = '10px 0 18px';
+  exp.addEventListener('click', openExport);
+  view.appendChild(exp);
+
+  if (!S.entries.length){
+    view.appendChild(el('p','empty','Nothing yet. When an urge shows up, tap ⚡ — the tap is the whole entry; details are optional.'));
+    return;
+  }
+  [...S.entries].reverse().forEach(e=>{
+    const idx = S.entries.indexOf(e);
+    const d = el('div','entry');
+    d.appendChild(el('div','t',fmtTime(e.t)));
+    const bits = [];
+    if (e.ctx!==undefined && e.ctx!==null) bits.push(CTX[e.ctx]);
+    if (e.ran!==undefined && e.ran!==null) bits.push(RAN[e.ran]);
+    if (e.then!==undefined && e.then!==null) bits.push(THEN[e.then]);
+    d.appendChild(el('div','s', bits.length? bits.join(' · ') : 'tap to add details'));
+    d.addEventListener('click', ()=>openSheet(idx));
+    view.appendChild(d);
+  });
+}
+
+// ---------- urge sheet ----------
+const sheetOv = document.getElementById('sheetOv');
+let curEntry = null;
+
+function chipRow(container, options, get, set){
+  container.innerHTML='';
+  options.forEach((opt,i)=>{
+    const b = el('button','opt',opt);
+    b.setAttribute('aria-pressed', String(get()===i));
+    b.addEventListener('click', ()=>{
+      set(get()===i? null : i); save();
+      [...container.children].forEach((c,j)=>c.setAttribute('aria-pressed', String(get()===j)));
+    });
+    container.appendChild(b);
+  });
+}
+
+function openSheet(idx){
+  curEntry = idx;
+  const e = S.entries[idx];
+  document.getElementById('sheetWhen').textContent = fmtTime(e.t);
+  chipRow(document.getElementById('ctxChips'), CTX, ()=>e.ctx??null, v=>e.ctx=v);
+  chipRow(document.getElementById('ranChips'), RAN, ()=>e.ran??null, v=>e.ran=v);
+  chipRow(document.getElementById('thenChips'), THEN, ()=>e.then??null, v=>e.then=v);
+  const felt = document.getElementById('feltTa'); felt.value = e.felt||'';
+  felt.oninput = ()=>{ e.felt=felt.value; save(); grow(felt); };
+  const note = document.getElementById('noteTa'); note.value = e.note||'';
+  note.oninput = ()=>{ e.note=note.value; save(); grow(note); };
+  sheetOv.hidden = false;
+  requestAnimationFrame(()=>{ grow(felt); grow(note); });
+}
+document.getElementById('urgeBtn').addEventListener('click', ()=>{
+  S.entries.push({ t:new Date().toISOString() }); save();
+  openSheet(S.entries.length-1);
+  if (tab==='log') render();
+});
+document.getElementById('closeSheet').addEventListener('click', ()=>{ sheetOv.hidden=true; render(); });
+document.getElementById('delEntry').addEventListener('click', ()=>{
+  if (curEntry!==null){ S.entries.splice(curEntry,1); save(); }
+  sheetOv.hidden=true; render();
+});
+sheetOv.addEventListener('click', e=>{ if(e.target===sheetOv){ sheetOv.hidden=true; render(); } });
+
+// ---------- card ----------
+const cardOv = document.getElementById('cardOv');
+document.getElementById('openCard').addEventListener('click', ()=>{ cardOv.hidden=false; });
+document.getElementById('closeCard').addEventListener('click', ()=>{ cardOv.hidden=true; });
+cardOv.addEventListener('click', e=>{ if(e.target===cardOv) cardOv.hidden=true; });
+
+// ---------- export ----------
+const expOv = document.getElementById('expOv');
+function buildExport(){
+  const L = ['# Choicefulness — export', '*'+new Date().toLocaleString()+'*', ''];
+  L.push('## Log ('+S.entries.length+' entries)');
+  S.entries.forEach(e=>{
+    const bits=[];
+    if(e.ctx!=null) bits.push(CTX[e.ctx]);
+    if(e.ran!=null) bits.push('move: '+RAN[e.ran]);
+    if(e.then!=null) bits.push('then: '+THEN[e.then]);
+    L.push('- '+fmtTime(e.t)+(bits.length? ' — '+bits.join(' · '):''));
+    if(e.felt&&e.felt.trim()) L.push('  - felt: '+e.felt.trim());
+    if(e.note&&e.note.trim()) L.push('  - note: '+e.note.trim());
+  });
+  L.push('');
+  L.push('## Sits');
+  const days = Object.keys(S.sits).sort();
+  if(!days.length) L.push('- none marked');
+  days.forEach(d=>L.push('- '+d+' ✓ (day '+S.sits[d]+')'));
+  L.push('');
+  L.push('## Pens');
+  const PENS = {d1_soak:'D1 soak — vs white-knuckling', d1_rule:'D1 — the rule in his words',
+                d2_soak:'D2 soak — where felt this week', d2_field:'D2 — field note (post-session run)',
+                d3_stem:'D3 — the stem on a logged moment', d3_review:'D3 — log review', d3_teach:'D3 — teach the move'};
+  let any=false;
+  for(const [id,label] of Object.entries(PENS)){
+    if(S.pens[id]&&S.pens[id].trim()){ any=true; L.push('**'+label+':** '+S.pens[id].trim()); L.push(''); }
+  }
+  if(!any) L.push('- none yet');
+  return L.join('\n');
+}
+function openExport(){
+  document.getElementById('expTa').value = buildExport();
+  document.getElementById('copyExp').textContent='Copy';
+  expOv.hidden=false;
+}
+document.getElementById('closeExp').addEventListener('click', ()=>{ expOv.hidden=true; });
+expOv.addEventListener('click', e=>{ if(e.target===expOv) expOv.hidden=true; });
+document.getElementById('copyExp').addEventListener('click', async ()=>{
+  const ta = document.getElementById('expTa');
+  let ok=false;
+  try{ await navigator.clipboard.writeText(ta.value); ok=true; }catch(e){}
+  if(!ok){ ta.focus(); ta.select(); try{ ok=document.execCommand('copy'); }catch(e){} }
+  document.getElementById('copyExp').textContent = ok? 'Copied ✓' : 'Copy failed — long-press the box';
+});
+
+// ---------- tabs ----------
+const tabToday = document.getElementById('tabToday');
+const tabLog = document.getElementById('tabLog');
+function setTab(t){
+  tab=t;
+  tabToday.setAttribute('aria-selected', String(t==='today'));
+  tabLog.setAttribute('aria-selected', String(t==='log'));
+  render(); window.scrollTo(0,0);
+}
+tabToday.addEventListener('click', ()=>setTab('today'));
+tabLog.addEventListener('click', ()=>setTab('log'));
+
+render();
+</script>
+</body>
+</html>
