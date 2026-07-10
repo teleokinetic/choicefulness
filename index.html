@@ -230,6 +230,7 @@
     <h2>Logged.</h2>
     <p class="when" id="sheetWhen"></p>
     <p style="font-size:14.5px;color:var(--muted);margin:0 0 4px">The tap was the whole job. Everything below is optional — add it now or never.</p>
+    <button class="btn quiet" id="sheetPlay" style="width:100%;margin:10px 0 2px">▶&nbsp; Run it guided · 2 min</button>
     <p class="lbl">Where were you</p>
     <div class="chips" id="ctxChips"></div>
     <p class="lbl">Drop in for a second</p>
@@ -251,6 +252,7 @@
   <div class="card" role="dialog" aria-label="The two-minute move">
     <h2>The two-minute move</h2>
     <p class="v">v0.1 · run it as written; wrongness is revision material</p>
+    <button class="btn quiet" id="cardPlay" style="margin:0 0 18px">▶&nbsp; Guided · 2 min</button>
     <ol>
       <li>Feet. Feel no separation between your feet and the floor.</li>
       <li>Settle downward inside your chest and neck. The urge pulls upward — you settle down. Sitting in your heart; no pressing, no collapse.</li>
@@ -291,6 +293,8 @@
     </div>
   </div>
 </div>
+
+<audio id="moveAudio" src="move.mp3" preload="auto"></audio>
 
 <script>
 const NS = 'choiceful_v1';
@@ -557,6 +561,35 @@ document.getElementById('delEntry').addEventListener('click', ()=>{
   sheetOv.hidden=true; render();
 });
 sheetOv.addEventListener('click', e=>{ if(e.target===sheetOv){ sheetOv.hidden=true; render(); } });
+
+// ---------- guided audio ----------
+// Plays the move; touches nothing in S — pressing play never counts as "the move ran".
+const moveAudio = document.getElementById('moveAudio');
+const playBtns = {
+  cardPlay:  { el: document.getElementById('cardPlay'),  idle: '▶  Guided · 2 min' },
+  sheetPlay: { el: document.getElementById('sheetPlay'), idle: '▶  Run it guided · 2 min' },
+};
+let wakeLock = null;
+async function grabWakeLock(){
+  try { wakeLock = await navigator.wakeLock.request('screen'); } catch(e){}
+}
+function dropWakeLock(){
+  try { if (wakeLock) wakeLock.release(); } catch(e){}
+  wakeLock = null;
+}
+function paintPlayBtns(){
+  const playing = !moveAudio.paused && !moveAudio.ended;
+  for (const b of Object.values(playBtns))
+    b.el.textContent = playing ? '❚❚  Pause' : b.idle;
+}
+for (const b of Object.values(playBtns))
+  b.el.addEventListener('click', ()=>{ moveAudio.paused ? moveAudio.play() : moveAudio.pause(); });
+moveAudio.addEventListener('play', ()=>{ grabWakeLock(); paintPlayBtns(); });
+moveAudio.addEventListener('pause', ()=>{ dropWakeLock(); paintPlayBtns(); });
+moveAudio.addEventListener('ended', ()=>{ dropWakeLock(); moveAudio.currentTime = 0; paintPlayBtns(); });
+document.addEventListener('visibilitychange', ()=>{
+  if (document.visibilityState === 'visible' && !moveAudio.paused) grabWakeLock();
+});
 
 // ---------- card ----------
 const cardOv = document.getElementById('cardOv');
