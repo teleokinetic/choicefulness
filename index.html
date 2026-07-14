@@ -251,17 +251,17 @@
 <div class="overlay cardwrap" id="cardOv" hidden>
   <div class="card" role="dialog" aria-label="The two-minute move">
     <h2>The two-minute move</h2>
-    <p class="v">v0.1 · run it as written; wrongness is revision material</p>
+    <p class="v">v0.2 · run it as written; wrongness is revision material</p>
     <button class="btn quiet" id="cardPlay" style="margin:0 0 18px">▶&nbsp; Guided · 2 min</button>
     <ol>
       <li>Feet. Feel no separation between your feet and the floor.</li>
       <li>Settle downward inside your chest and neck. The urge pulls upward — you settle down. Sitting in your heart; no pressing, no collapse.</li>
-      <li>Find the raw quality of desire in your body — wanting itself, before any object. Wherever it&rsquo;s easiest.</li>
-      <li>Ask: what is this urge actually asking for? Find the want inside it. Name it once, if naming helps.</li>
-      <li>Feel that want directly, as raw desire. Bathe in it, no subject. Not the note that it&rsquo;s there — the wanting itself, in the body.</li>
+      <li>Feel what&rsquo;s actually here — whatever you&rsquo;re feeling, directly. Give it breathing room. Feet still on the ground, whole body still inhabited.</li>
+      <li>Let it express itself fully. Let it move — rise, spread, tighten, flow. Nothing to fix, nothing to solve.</li>
+      <li>Feel what it would be like if this feeling were raw desire without an object — wanting itself, in the body. Bathe in it, no subject.</li>
       <li>Now choose, from here. Either way, the rule is kept.</li>
     </ol>
-    <p class="fm"><strong>Failure modes.</strong> Toll-booth — running the move to pay for a yes; detector: nothing was felt. Grade the run, not yourself. · Noting instead of feeling — locating the want and filing the note. · Arguing with the urge — there&rsquo;s no case to win. · Skipping the ground — steps 1&ndash;2 are what make 3&ndash;5 possible.</p>
+    <p class="fm"><strong>Failure modes.</strong> Toll-booth — running the move to pay for a yes; detector: nothing was felt. Grade the run, not yourself. · Noting instead of feeling — locating the feeling and filing the note. · Arguing with the urge — there&rsquo;s no case to win. · Skipping the ground — steps 1&ndash;2 are what make 3&ndash;5 possible.</p>
     <div style="display:flex;justify-content:flex-end;margin-top:14px">
       <button class="btn" id="closeCard">Close</button>
     </div>
@@ -325,14 +325,14 @@ const DAYS = {
        pen:{id:'d1_soak', ph:'how is this different from white-knuckling? your words…'}},
       {k:'sit', steps:[
         'Settle. Whole body, feet, ground. Let the breath drop. Give this a couple of minutes.',
-        'Evoke, at low heat: a weekday afternoon at home. The session just ended; the screen has gone dark. A flicker of boredom, a flicker of attraction. The phone is near. Hold it like a picture at arm’s length.',
-        'Catch the reach starting.',
+        'Evoke a real one, at low heat: a specific afternoon you actually remember. The session just ended; the screen has gone dark. Don’t hold it like a picture — re-enter it. The actual felt sense of it happening: the room, the chair, the boredom flickering, the attraction flickering, the phone near.',
+        'Right up to the edge: feel the reach wanting to occur.',
         'Run the move. Open the card and read it slowly, doing each step as you read. This is the only day the card leads.',
-        'Let the scene dissolve. Rest a moment.',
-        'Round two: evoke again, a touch closer. Run the move from memory this time; peek only if you need to.',
+        'Let the memory dissolve. Rest a moment.',
+        'Round two: the same memory, a touch closer in. Run the move from memory this time; peek only if you need to.',
         'Close: say the rule once. Then picture tomorrow’s most likely window, once — and see the move running there.']},
       {k:'rapid', text:'Without looking: the six steps, out loud, fast. Then open the card and check what dropped — the misses are tomorrow’s target.'},
-      {k:'note', text:'The log is live from right now. Any urge, anywhere: tap ⚡. The tap is the whole job — details are optional, then or never.'},
+      {k:'note', text:'The log is live from right now. Any urge, anywhere: tap ⚡. The tap is the whole job — details are optional, then or never. The bar, per your 7/13 note: any time the urge to masturbate shows up and you’re alone — that’s an entry.'},
       {k:'pen', id:'d1_rule', label:'Say it back', ph:'the rule, in your own words…'},
     ]},
   2: { title:'From memory',
@@ -346,7 +346,7 @@ const DAYS = {
        pen:{id:'d2_soak', ph:'“I can’t be with the wanting, so I have to make it go away by solving it.” — where did you feel that this week?'}},
       {k:'sit', steps:[
         'Settle. Whole body, feet, ground.',
-        'Evoke, hotter: the phone is already in your hand. The first flick has happened. Feel what that does in the body.',
+        'Evoke a real one, hotter: a time the phone was already in your hand, the first flick already done. The felt sense of it happening, not the picture. Feel what it does in the body.',
         'Run the move — from memory. The card is backup, not the lead.',
         'Dissolve. Rest.',
         'Two more rounds if you’re steady, each from memory.',
@@ -462,7 +462,7 @@ function renderToday(){
       sec.appendChild(el('p',null,b.text));
       const d = el('details'); d.appendChild(el('summary',null,'Check the steps'));
       const ol = el('ol','steps');
-      ['Feet — no separation with the floor','Settle downward, chest and neck','Find the raw quality of desire','Find the want inside the urge','Feel that want as raw desire — bathe, no subject','Choose from here — either way, the rule is kept']
+      ['Feet — no separation with the floor','Settle downward, chest and neck','Feel what’s here — breathing room, whole body','Let it express, let it move','Feel it as raw desire, no object','Choose from here — either way, the rule is kept']
         .forEach(s=>ol.appendChild(el('li',null,s)));
       d.appendChild(ol); sec.appendChild(d);
     }
