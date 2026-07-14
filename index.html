@@ -272,7 +272,7 @@
 <div class="overlay cardwrap" id="expOv" hidden>
   <div class="card" role="dialog" aria-label="Export">
     <h2>Export</h2>
-    <p style="font-size:14.5px;color:var(--muted)">Tap Copy, then paste into our chat. If Copy doesn&rsquo;t take, long-press in the box.</p>
+    <p style="font-size:14.5px;color:var(--muted)">Tap Copy, then paste into our chat. If Copy doesn&rsquo;t take: long-press in the box (phone), or click in it and &#8984;A &#8984;C (desktop).</p>
     <textarea id="expTa" class="exp-ta" readonly></textarea>
     <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:10px">
       <button class="btn quiet" id="closeExp">Close</button>
@@ -641,10 +641,22 @@ document.getElementById('closeExp').addEventListener('click', ()=>{ expOv.hidden
 expOv.addEventListener('click', e=>{ if(e.target===expOv) expOv.hidden=true; });
 document.getElementById('copyExp').addEventListener('click', async ()=>{
   const ta = document.getElementById('expTa');
+  const btn = document.getElementById('copyExp');
   let ok=false;
-  try{ await navigator.clipboard.writeText(ta.value); ok=true; }catch(e){}
-  if(!ok){ ta.focus(); ta.select(); try{ ok=document.execCommand('copy'); }catch(e){} }
-  document.getElementById('copyExp').textContent = ok? 'Copied ✓' : 'Copy failed — long-press the box';
+  if (matchMedia('(pointer: coarse)').matches){
+    // phone: async API works inside the tap; selecting first would flash the keyboard
+    try{ await navigator.clipboard.writeText(ta.value); ok=true; }catch(e){}
+    if(!ok){ ta.focus(); ta.select(); try{ ok=document.execCommand('copy'); }catch(e){} }
+    btn.textContent = ok? 'Copied ✓' : 'Copy failed — long-press the box';
+  } else {
+    // desktop: execCommand only works synchronously inside the click gesture —
+    // awaiting the clipboard API first left the fallback outside it
+    ta.readOnly=false; ta.focus(); ta.select(); ta.setSelectionRange(0, ta.value.length);
+    try{ ok = document.execCommand('copy') && ta.selectionEnd>ta.selectionStart; }catch(e){}
+    ta.readOnly=true;
+    if(!ok && navigator.clipboard){ try{ await navigator.clipboard.writeText(ta.value); ok=true; }catch(e){} }
+    btn.textContent = ok? 'Copied ✓' : 'Copy failed — the text is selected, hit ⌘C';
+  }
 });
 
 // ---------- traveling feedback dock ----------
