@@ -142,6 +142,11 @@
   .pill .tick{display:none;font-size:12px}
   .pill.on{background:var(--ink);border-color:var(--ink);color:var(--paper)}
   .pill.on .tick{display:inline}
+  .crosslink{display:flex;align-items:center;justify-content:center;width:100%;min-height:44px;margin-top:6px;
+    font-size:13px;color:var(--ink-soft);letter-spacing:.02em}
+  .crosslink .tick{display:none}
+  .crosslink.on{color:var(--ink);font-weight:500}
+  .crosslink.on .tick{display:inline}
   .capture{max-height:0;overflow:hidden;transition:max-height .3s ease}
   .capture.on{max-height:150px}
   .capturelbl{font-family:var(--f-voice);font-style:italic;font-size:13.5px;color:var(--ink-soft);margin:14px 0 8px;line-height:1.45}
@@ -207,11 +212,11 @@
     <div class="sp2"></div>
 
     <div class="mover">
-      <button class="playbtn" id="playBtn" aria-label="Play the two-minute move">
+      <button class="playbtn" id="playBtn" aria-label="Play the go-to move">
         <svg viewBox="0 0 15 15" id="playIcon"><path d="M3 1.5 L13 7.5 L3 13.5 Z" fill="currentColor"/></svg>
       </button>
       <div class="movetxt">
-        <div class="movelbl">The two-minute move</div>
+        <div class="movelbl">The go-to move</div>
         <div class="movebar"><i id="movebarFill"></i></div>
       </div>
       <div class="movedur" id="movedur">5:33</div>
@@ -235,7 +240,7 @@
         <div class="lrow"><span class="k">The line</span><span class="lead"></span><span class="v" id="wLine">chosen so far</span></div>
         <div class="lrow"><span class="k">Urges logged</span><span class="lead"></span><span class="v" id="wUrges">0</span></div>
         <div class="lrow"><span class="k">The move ran</span><span class="lead"></span><span class="v" id="wRan">0 of 0</span></div>
-        <div class="lrow"><span class="k">Went ahead</span><span class="lead"></span><span class="v" id="wAhead">0</span></div>
+        <div class="lrow"><span class="k">Crossed</span><span class="lead"></span><span class="v" id="wAhead">0</span></div>
       </div>
       <div class="cardnote" id="wNote"></div>
       <button class="copybtn" id="copySummaryBtn">Copy summary for the review</button>
@@ -253,7 +258,6 @@
     <button class="tab" id="tab-week"><span class="dot"></span><span>Week</span></button>
   </div>
 
-  <button class="dock" id="fbDock" aria-label="Leave feedback">✎</button>
 
   <!-- ============ URGE SHEET ============ -->
   <div class="scrim" id="scrim"></div>
@@ -269,9 +273,9 @@
     <div class="q">Then?</div>
     <div class="pills" id="q2">
       <button class="pill" data-val="moved_on"><span class="tick">✓</span>moved on</button>
-      <button class="pill" data-val="went_ahead"><span class="tick">✓</span>went ahead</button>
       <button class="pill" data-val="still_open"><span class="tick">✓</span>still open</button>
     </div>
+    <button class="crosslink" id="crossLink"><span class="tick">✓ </span>the line got crossed →</button>
     <div class="capture" id="capture">
       <div class="capturelbl">From the inside — what was it like, just before and during? A sentence is plenty.</div>
       <textarea class="capturebox" id="capturebox" rows="2" aria-label="Describe the experience"></textarea>
@@ -287,7 +291,7 @@
     <div class="q">The line</div>
     <div class="pills" id="dayPills">
       <button class="pill" data-val="chosen"><span class="tick">✓</span>chosen</button>
-      <button class="pill" data-val="ahead"><span class="tick">✓</span>went ahead</button>
+      <button class="pill" data-val="ahead"><span class="tick">✓</span>crossed the line</button>
       <button class="pill" data-val="clear"><span class="tick">✓</span>clear the mark</button>
     </div>
     <button class="donebtn" id="daySave">Save</button>
@@ -301,15 +305,6 @@
     <input type="date" class="dateinput" id="startInput" aria-label="Start date">
     <button class="donebtn" id="startSave">Save</button>
     <div class="sheetnote">Changing this re-numbers every day on the grid.</div>
-  </div>
-
-  <!-- ============ FEEDBACK SHEET ============ -->
-  <div class="sheet" id="sheet-fb" role="dialog" aria-modal="true" aria-label="Feedback">
-    <div class="handle"></div>
-    <div class="sheettitle">Feedback</div>
-    <div class="sheettime">What's off, what's missing — while it's hot.</div>
-    <textarea class="capturebox" id="fbbox" rows="3" style="margin-top:12px" aria-label="Feedback"></textarea>
-    <button class="donebtn" id="fbSave">Save</button>
   </div>
 
   <!-- ============ MODALS ============ -->
@@ -396,12 +391,12 @@
   }
   var NOTES = {
     chosen:  "Day {n} — chosen.",
-    ahead:   "Day {n} — went ahead. Logged, part of the record.",
+    ahead:   "Day {n} — crossed. Logged, part of the record.",
     today:   "Day {n} — today, still open.",
     future:  "Day {n} — not here yet.",
     unmarked:"Day {n} — not recorded. Tap it to fill it in."
   };
-  var ARIA = {chosen:"chosen", ahead:"went ahead", today:"today", future:"to come", unmarked:"not recorded"};
+  var ARIA = {chosen:"chosen", ahead:"crossed", today:"today", future:"to come", unmarked:"not recorded"};
 
   var noteTimer;
   function showNote(text){
@@ -426,7 +421,7 @@
   }
   $("legend").innerHTML =
     '<span><svg viewBox="0 0 44 44"><circle class="g-held" cx="22" cy="22" r="18"/></svg>chosen</span>'
-   +'<span><svg viewBox="0 0 44 44"><circle class="g-lapse" cx="22" cy="22" r="16" stroke-width="5" stroke-dasharray="80 21" stroke-dashoffset="-3"/></svg>went ahead</span>';
+   +'<span><svg viewBox="0 0 44 44"><circle class="g-lapse" cx="22" cy="22" r="16" stroke-width="5" stroke-dasharray="80 21" stroke-dashoffset="-3"/></svg>crossed</span>';
 
   function renderStreak(){
     $("streaknum").textContent = streak();
@@ -503,13 +498,21 @@
     S.urges.unshift(currentUrge); save();       // saved the instant it's tapped
     $("sheettime").textContent = fmtTime(currentUrge.t);
     document.querySelectorAll("#q1 .pill, #q2 .pill").forEach(function(p){ p.classList.remove("on"); });
+    $("crossLink").classList.remove("on");
     $("capture").classList.remove("on"); $("capturebox").value="";
     openSheet("sheet-urge");
   });
   bindPills("q1", function(v){ if(currentUrge){ currentUrge.ran = (v==="yes"); save(); } });
   bindPills("q2", function(v){
     if(currentUrge){ currentUrge.then = v; save(); }
-    $("capture").classList.toggle("on", v==="went_ahead");
+    $("crossLink").classList.remove("on");
+    $("capture").classList.remove("on");
+  });
+  $("crossLink").addEventListener("click", function(){
+    if(currentUrge){ currentUrge.then = "went_ahead"; save(); }   // stored value stays stable
+    document.querySelectorAll("#q2 .pill").forEach(function(p){ p.classList.remove("on"); });
+    $("crossLink").classList.add("on");
+    $("capture").classList.add("on");
   });
   $("capturebox").addEventListener("input", function(){
     if(currentUrge){ currentUrge.note = $("capturebox").value; save(); }
@@ -531,20 +534,6 @@
     var v = $("startInput").value;
     if(v){ S.start = v; save(); }
     closeSheets(); renderToday(); renderWeek();
-  });
-
-  /* ---------- feedback dock ---------- */
-  $("fbDock").addEventListener("click", function(){
-    $("fbbox").value = "";
-    openSheet("sheet-fb");
-  });
-  $("fbSave").addEventListener("click", function(){
-    var txt = $("fbbox").value.trim();
-    if(txt){
-      var where = $("page-week").classList.contains("on") ? "week" : "today";
-      S.fb.push({ t: Date.now(), where: where, text: txt }); save();
-    }
-    closeSheets();
   });
 
   /* ---------- move player (real audio) ---------- */
@@ -601,7 +590,7 @@
       + "The line: "+(s.crossedWeek===0 ? "chosen every day so far." : s.crossedWeek+" crossed day"+(s.crossedWeek>1?"s":"")+" this week.")+"\n"
       + "Experiment to date: "+(s.crossedAll===0 ? "no crossed days" : s.crossedAll+" crossed day"+(s.crossedAll>1?"s":""))+" out of "+s.d+".\n"
       + "Urges this week: "+s.urges+" — the move ran on "+s.ran+".\n"
-      + "After: moved on "+s.moved+" · went ahead "+s.ahead+" · still open "+s.open+".";
+      + "After: moved on "+s.moved+" · crossed "+s.ahead+" · still open "+s.open+".";
   }
   function renderEntries(){
     var box = $("entries"); box.innerHTML = "";
@@ -614,7 +603,7 @@
       var g = lapse
         ? '<svg viewBox="0 0 44 44"><circle class="g-lapse" cx="22" cy="22" r="16" stroke-width="5" stroke-dasharray="80 21" stroke-dashoffset="-3"/></svg>'
         : '<svg viewBox="0 0 44 44"><circle cx="22" cy="22" r="15" fill="none" stroke="var(--faint)" stroke-width="4"/><circle cx="22" cy="22" r="5.5" fill="var(--ink)"/></svg>';
-      var words = u.then==="moved_on" ? "moved on" : u.then==="went_ahead" ? "went ahead" : u.then==="still_open" ? "still open" : "logged";
+      var words = u.then==="moved_on" ? "moved on" : u.then==="went_ahead" ? "crossed the line" : u.then==="still_open" ? "still open" : "logged";
       if(lapse && u.note) words += " — “"+u.note.slice(0,30)+(u.note.length>30?"…":"")+"”";
       var mark = u.ran===true ? "move ran ✓" : u.ran===false ? "no move —" : "";
       var d = document.createElement("div");
@@ -633,12 +622,13 @@
   /* ---------- export ---------- */
   function exportText(){
     var lines = ["Choicefulness export — "+todayISO(), "Start: "+S.start+" · today: day "+dayNum(), "", "Days:"];
-    for(var n=1;n<=TOTAL;n++){ if(S.days[n]) lines.push("  "+n+" — "+(S.days[n]==="ahead"?"went ahead":"chosen")); }
+    for(var n=1;n<=TOTAL;n++){ if(S.days[n]) lines.push("  "+n+" — "+(S.days[n]==="ahead"?"crossed":"chosen")); }
     lines.push("", "Urges:");
     S.urges.slice().reverse().forEach(function(u){
+      var thenWord = u.then==="went_ahead" ? "crossed the line" : (u.then||"—").replace("_"," ");
       lines.push("  Day "+urgeDay(u)+" "+fmtTime(u.t)
         +" — move "+(u.ran===true?"ran":u.ran===false?"didn't run":"?")
-        +" · "+(u.then||"—")+(u.note?" · "+u.note:""));
+        +" · "+thenWord+(u.note?" · "+u.note:""));
     });
     if(S.fb.length){
       lines.push("", "## Feedback");
