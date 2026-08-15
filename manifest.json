@@ -3,8 +3,8 @@
   "short_name": "Choiceful",
   "start_url": ".",
   "display": "standalone",
-  "background_color": "#F5F2EE",
-  "theme_color": "#6D3F5B",
+  "background_color": "#F7F2EA",
+  "theme_color": "#F7F2EA",
   "icons": [
     { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" }
   ]
